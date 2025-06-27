@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection.Metadata.Ecma335;
 
@@ -22,11 +23,13 @@ namespace BlogProjectDotNET_9.Models
         [DataType(DataType.Date)]
         public DateTime PublishedDate { get; set; } = DateTime.Now;
 
+        [ValidateNever]
         public string FeatureImagePath { get; set; }
 
         [ForeignKey("Category")]
         public int CategoryId { get; set; }
 
+        [ValidateNever]
         public Category Category { get; set; }
 
         public ICollection<Comment> Comments { get; set; }
