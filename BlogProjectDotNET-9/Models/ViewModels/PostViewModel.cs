@@ -8,7 +8,7 @@ namespace BlogProjectDotNET_9.Models.ViewModels
         public Post Post { get; set; }
         [ValidateNever]
         public IEnumerable<SelectListItem> Categories { get; set; }
-        public IFormFile FeatureImage { get; set; }
+        public IFormFile? FeatureImage { get; set; }
 
     }
 }

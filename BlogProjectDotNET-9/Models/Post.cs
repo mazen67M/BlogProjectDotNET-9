@@ -32,6 +32,7 @@ namespace BlogProjectDotNET_9.Models
         [ValidateNever]
         public Category Category { get; set; }
 
+            [ValidateNever]
         public ICollection<Comment> Comments { get; set; }
 
     }

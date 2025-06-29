@@ -6,11 +6,11 @@
 
 
 <style>
-    .content-wrapper{
+    .content-wrapper {
         padding: 20px;
-        max-width:1000px;
+        max-width: 1000px;
         margin: 0 auto;
-        font-family:sans-serif;
+        font-family: sans-serif;
     }
 </style>
 
@@ -22,7 +22,7 @@
         </div>
 
         <div class="col-6 text-end">
-            <a href="#" class="btn btn-dark"> Back To List</a>
+            <a asp-action="Index" asp-controller="Post" class="btn btn-dark"> Back To List</a>
         </div>
     </div>
     <hr />
@@ -35,15 +35,15 @@
         </div>
         <div class="form-group">
             <label asp-for="Post.Title"></label>
-            <input asp-for="Post.Title" type="text" class="form-control" name="name" placeholder="Enter The Title" />
+            <input asp-for="Post.Title" type="text" class="form-control" placeholder="Enter The Title" />
             <span asp-validation-for="Post.Title" class="text-danger"></span>
         </div>
 
         <br />
         <div class="form-group">
             <label asp-for="Post.CategoryId">Category</label>
-            <select asp-for="Post.Category" asp-items="Model.Categories" class="form-control">
-                <option value="Select Category">Select Category</option>
+            <select asp-for="Post.CategoryId" asp-items="Model.Categories" class="form-control">
+                <option value="">Select Category</option>
             </select>
             <span asp-validation-for="Post.CategoryId"></span>
         </div>
@@ -51,7 +51,7 @@
         <br />
         <div class="form-group">
             <label asp-for="Post.Author"></label>
-            <input asp-for="Post.Author" type="text" class="form-control" name="name" placeholder="Enter The Author Name" />
+            <input asp-for="Post.Author" type="text" class="form-control" placeholder="Enter The Author Name" />
             <span asp-validation-for="Post.Author" class="text-danger"></span>
         </div>
 
@@ -59,7 +59,8 @@
 
         <div class="form-group">
             <label asp-for="Post.Content"></label>
-            <textarea asp-for="Post.Content" type="text" class="form-control" name="name" placeholder="Enter The Post Content" ></textarea>
+            <textarea asp-for="Post.Content" type="text" class="form-control"
+                placeholder="Enter The Post Content"></textarea>
             <span asp-validation-for="Post.Content" class="text-danger"></span>
         </div>
 
@@ -70,7 +71,29 @@
             <input asp-for="FeatureImage" class="form-control" />
         </div>
         <br />
-        <button class="btn btn-primary mt-1" type="submit" >Create</button>
-        <a class="btn btn-dark mt-1">Back To List</a> 
+        <button class="btn btn-primary mt-1" type="submit">Create</button>
+        <a class="btn btn-dark mt-1">Back To List</a>
     </form>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.tiny.cloud/1/d3fp1fofhtturfhsthantmso3q0fru5s2d0n3snh4ftgyupy/tinymce/7/tinymce.min.js"
+        referrerpolicy="origin"></script>
+    <script>
+        tinymce.init({
+            selector: 'textarea',
+            plugins: [
+                'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'image', 'link', 'lists', 'media', 'searchreplace', 'table', 'visualblocks', 'wordcount',
+                'checklist', 'mediaembed', 'casechange', 'formatpainter', 'pageembed', 'a11ychecker', 'tinymcespellchecker', 'permanentpen', 'powerpaste', 'advtable', 'advcode', 'editimage', 'advtemplate', 'ai', 'mentions', 'tinycomments', 'tableofcontents', 'footnotes', 'mergetags', 'autocorrect', 'typography', 'inlinecss', 'markdown', 'importword', 'exportword', 'exportpdf'
+            ],
+            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+            tinycomments_mode: 'embedded',
+            tinycomments_author: 'Author name',
+            mergetags_list: [
+                { value: 'First.Name', title: 'First Name' },
+                { value: 'Email', title: 'Email' },
+            ],
+            ai_request: (request, respondWith) => respondWith.string(() => Promise.reject('See docs to implement AI Assistant')),
+        });
+    </script>
+}

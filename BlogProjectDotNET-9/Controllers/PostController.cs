@@ -4,6 +4,7 @@ using BlogProjectDotNET_9.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Net;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlogProjectDotNET_9.Controllers
 {
@@ -20,9 +21,17 @@ namespace BlogProjectDotNET_9.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult Index(int? categoryID)
         {
-            return View();
+            var postQuery = _context.Posts.Include(p => p.Category).AsQueryable();
+            if (categoryID.HasValue)
+            {
+                postQuery = postQuery.Where(p => p.CategoryId == categoryID);
+
+            }
+            var posts = postQuery.ToList();
+            ViewBag.Categories = _context.Categories.ToList();
+            return View(posts);
         }
 
         [HttpGet]
@@ -63,7 +72,7 @@ namespace BlogProjectDotNET_9.Controllers
 
 
         private async Task<string> UploadFileToExtension(IFormFile file)
-        { 
+        {
             var inputFileExtension = Path.GetExtension(file.FileName);
             var fileName = Guid.NewGuid().ToString() + inputFileExtension;
             var wwwRootPath = _webHostEnvironment.WebRootPath;
@@ -74,16 +83,18 @@ namespace BlogProjectDotNET_9.Controllers
                 Directory.CreateDirectory(ImagesFolderPath);
             }
             var filePath = Path.Combine(ImagesFolderPath, fileName);
-            try {
+            try
+            {
                 await using (var fileStream = new FileStream(filePath, FileMode.Create))
-                { 
+                {
                     await file.CopyToAsync(fileStream);
                 }
             }
-            catch (Exception ex) {
-                return "Error Uploading Image: "+ ex.Message;
+            catch (Exception ex)
+            {
+                return "Error Uploading Image: " + ex.Message;
             }
             return "/images/" + fileName;
         }
-    } 
+    }
 }

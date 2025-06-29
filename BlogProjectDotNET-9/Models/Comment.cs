@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BlogProjectDotNET_9.Models
@@ -12,6 +13,7 @@ namespace BlogProjectDotNET_9.Models
         public string UserName { get; set; }
 
         [DataType(DataType.Date)]
+        [ValidateNever]
         public DateTime CommentDate { get; set; } = DateTime.Now;
 
         [Required]
@@ -19,6 +21,7 @@ namespace BlogProjectDotNET_9.Models
 
         [ForeignKey("Post")]
         public int PostId { get; set; }
+        [ValidateNever]
         public Post Post { get; set; }
 
     }

@@ -14,6 +14,6 @@ namespace BlogProjectDotNET_9.Models
         [Required]
         public string Description { get; set; }
 
-        public ICollection<Post> Posts { get; set; }
+        public ICollection<Post>? Posts { get; set; }
     }
 }
