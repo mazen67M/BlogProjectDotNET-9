@@ -1,0 +1,16 @@
+﻿@{
+    ViewData["Title"] = "Welcome";
+}
+
+<div class="text-center mt-5">
+    <h2>Welcome, @ViewBag.UserName 👋</h2>
+
+    @if (User.Identity.IsAuthenticated)
+    {
+        <p class="lead">Glad to see you again!</p>
+    }
+    else
+    {
+        <p class="lead">Please <a asp-controller="Account" asp-action="Login">Login</a> to get started.</p>
+    }
+</div>

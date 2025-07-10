@@ -1,0 +1,116 @@
+﻿@model Post
+@{
+    ViewData["Title"] = Model.Title;
+}
+<style>
+    .content-wrapper {
+        padding: 20px;
+        max-width: 1000px;
+        margin: 0 auto;
+        font-family: sans-serif;
+    }
+
+    .feature-image {
+        width: 100%;
+        height: 500px;
+        object-fit: cover;
+        margin-bottom: 20px;
+    }
+</style>
+
+
+<div class="text-end">
+    <a class="btn btn-secondary" asp-action="Edit" asp-controller="Post" asp-route-id="@Model.Id">Edit Post</a>
+    <a class="btn btnalert-danger" asp-action="Delete" asp-controller="Post" asp-route-id="@Model.Id">Delete
+        Post</a>
+</div>
+
+<hr />
+
+<div class="content-wrapper">
+    <h1>@Model.Title</h1>
+    <p><span class="badge bg-primary ">By:</span> @Model.Author </p>
+    <p><span class="badge bg-primary">Published on :</span> @Model.PublishedDate</p>
+    <p><span class="badge bg-secondary">Category:</span> @Model.Category.Name</p>
+    <img src="@Model.FeatureImagePath" alt="@Model.Title" class="feature-image" />
+    <hr />
+    <div>@Html.Raw(@Model.Content)</div>
+    @if (Model.Comments.Any())
+    {
+        <div class="CommentSection">
+            @foreach (var comment in Model.Comments)
+            {
+                <div class="card mb-3 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">@comment.User.UserName</h5>
+                        <p class="card-text text-muted">@comment.CommentDate</p>
+                        <p class="card-text">@comment.CommentText</p>
+                    </div>
+                </div>
+                <hr />
+            }
+        </div>
+    }
+    else
+    {
+        <hr />
+        <p class="text-muted">No Comments Yet, Be The First Who Comment</p>
+    }
+
+    <h3 class="text-black">Leave a Comment</h3>
+
+    <form id="FormComment">
+        <div class="form-group">
+            <label for="UserName"> User Name </label>
+            <input for="UserName" id="UserName" class="form-control" required name="UserName" />
+        </div>
+
+        <div class="form-group">
+            <br />
+            <label for="Content"> Comment </label>
+            <textarea for="Content" id="Content" class="form-control" required rows="3" name="Content"></textarea>
+        </div>
+        <button class="btn btn-primary m-3 p-3" value="submit">Comment</button>
+    </form>
+</div>
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            $("#FormComment").on('submit', function (event) {
+                event.preventDefault();
+
+                var userName = $("#UserName").val();
+                var content = $("#Content").val();
+                var postId = @Model.Id;
+
+                $.ajax({
+                    url: '@Url.Action("AddComment", "Post")',
+                    type: 'POST',
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        UserName: userName,
+                        CommentText: content,
+                        PostId: postId
+                    }),
+                    success: function (response) {
+                        $('#FormComment')[0].reset(); // ← Reset the form
+
+                        $('.CommentSection').append(`
+                                                <div class="card mb-3 shadow-sm">
+                                                    <div class="card-body">
+                                                        <h5 class="card-title">${response.username}</h5>
+                                                        <p class="card-text text-muted">${response.commentDate}</p>
+                                                        <p class="card-text">${response.content}</p>
+                                                    </div>
+                                                </div>
+                                            `);
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("Error:", error);
+                    }
+                });
+            });
+        });
+    </script>
+}

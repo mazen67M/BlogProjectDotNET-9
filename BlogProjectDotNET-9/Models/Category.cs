@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using BlogProjectDotNET_9.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace BlogProjectDotNET_9.Models
 {

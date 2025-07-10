@@ -2,27 +2,27 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace BlogProjectDotNET_9.Models
-{
-    public class Comment
+    namespace BlogProjectDotNET_9.Models
     {
-        [Key]
-        public int Id { get; set; }
+        public class Comment
+        {
+            [Key]
+            public int Id { get; set; }
 
-        [Required,MaxLength(100,ErrorMessage ="Can't Exceed 100 character!")]
-        public string UserName { get; set; }
+            [Required]
+            public string CommentText { get; set; }
 
-        [DataType(DataType.Date)]
-        [ValidateNever]
-        public DateTime CommentDate { get; set; } = DateTime.Now;
+            public DateTime CommentDate { get; set; } = DateTime.Now;
 
-        [Required]
-        public string CommentText { get; set; }
+            // علاقة مع البوست
+            public int PostId { get; set; }
+            [ValidateNever]
+            public Post Post { get; set; }
 
-        [ForeignKey("Post")]
-        public int PostId { get; set; }
-        [ValidateNever]
-        public Post Post { get; set; }
-
+            // علاقة مع المستخدم
+            [ForeignKey("User")]
+            public string UserId { get; set; }
+            [ValidateNever]
+            public ApplicationUser User { get; set; }
+        }
     }
-}
