@@ -35,18 +35,16 @@ namespace BlogProjectDotNET_9.Controllers
             {
                 UserName = model.userName,
                 Email = model.Email,
-                FullName = model.userName,
+                FullName = model.FullName,
                 IsApproved = false
             };
             var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
-                if (!await _roleManager.RoleExistsAsync("User"))
-                    await _roleManager.CreateAsync(new IdentityRole("User"));
+                string roleToAssign = model.Role == "Author" ? "Author" : "User";
+                await _userManager.AddToRoleAsync(user, roleToAssign);
 
-                await _userManager.AddToRoleAsync(user, "User");
-
-                return RedirectToAction("Login");
+                return RedirectToAction("PendingApproval");
             }
 
             foreach (var error in result.Errors)
@@ -91,6 +89,12 @@ namespace BlogProjectDotNET_9.Controllers
         public IActionResult AccessDenied()
         {
             return View("AccessDenied");
+        }
+
+        [AllowAnonymous]
+        public IActionResult PendingApproval()
+        {
+            return View();
         }
 
         public IActionResult Index()

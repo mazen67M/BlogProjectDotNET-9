@@ -47,10 +47,15 @@ namespace BlogProjectDotNET_9
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-                if (!await roleManager.RoleExistsAsync("Admin"))
+                string[] roles = { "Admin", "Author", "User" };
+                foreach (var role in roles)
                 {
-                    await roleManager.CreateAsync(new IdentityRole("Admin"));
+                    if (!await roleManager.RoleExistsAsync(role))
+                    {
+                        await roleManager.CreateAsync(new IdentityRole(role));
+                    }
                 }
+
 
                 var admin = await userManager.FindByEmailAsync("mazenmohsen11111@gmail.com");
                 if (admin == null)

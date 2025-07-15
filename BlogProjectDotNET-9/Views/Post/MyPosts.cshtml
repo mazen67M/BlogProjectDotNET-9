@@ -1,0 +1,31 @@
+﻿@model IEnumerable<Post>
+
+@{
+    ViewData["Title"] = "My Posts";
+}
+
+<h2>My Posts</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Published Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var post in Model)
+        {
+            <tr>
+                <td>@post.Title</td>
+                <td>@post.Category.Name</td>
+                <td>@post.PublishedDate.ToShortDateString()</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@post.Id" class="btn btn-sm btn-warning">Edit</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

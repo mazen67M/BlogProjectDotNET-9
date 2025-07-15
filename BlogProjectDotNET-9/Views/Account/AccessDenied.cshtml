@@ -1,5 +1,8 @@
 ﻿@{
     ViewData["Title"] = "Access Denied";
 }
-<h2>Access Denied</h2>
-<p>You are not authorized to access this page.</p>
+
+<div class="alert alert-danger mt-4">
+    <h4>You are not authorized to access this page.</h4>
+    <a asp-action="Login" class="btn btn-primary mt-2">Go to Login</a>
+</div>

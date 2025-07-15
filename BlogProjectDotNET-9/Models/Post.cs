@@ -21,9 +21,9 @@ namespace BlogProjectDotNET_9.Models
             [ValidateNever]
             public string? FeatureImagePath { get; set; }
 
-            // علاقة مع المستخدم (الكاتب)
             [ForeignKey("Author")]
             public string AuthorId { get; set; }
+
             [ValidateNever]
             public ApplicationUser Author { get; set; }
 

@@ -2,6 +2,14 @@
     ViewData["Title"] = "Home Page";
 }
 
+<form method="get" asp-action="Index" class="mb-3">
+    <div class="input-group">
+        <input type="text" name="search" class="form-control" placeholder="Search by Title..." />
+        <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+</form>
+
+
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>

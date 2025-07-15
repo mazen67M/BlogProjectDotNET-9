@@ -1,0 +1,84 @@
+﻿@using Microsoft.AspNetCore.Identity
+@model IEnumerable<ApplicationUser>
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<h2 class="mt-4">Admin Dashboard</h2>
+<hr />
+
+<div class="row text-center mb-5">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h4>@ViewBag.UsersCount</h4>
+                <p>Total Users</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h4>@ViewBag.AuthorsCount</h4>
+                <p>Total Authors</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <h4>@ViewBag.PostsCount</h4>
+                <p>Total Posts</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <h4>@ViewBag.CommentsCount</h4>
+                <p>Total Comments</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.Any())
+{
+    <h3>Pending Approval</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Full Name</th>
+                <th>UserName</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Approve</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>@user.FullName</td>
+                    <td>@user.UserName</td>
+                    <td>@user.Email</td>
+                    <td>
+                        @(await Context.RequestServices
+                                        .GetService<UserManager<ApplicationUser>>()
+                                        .GetRolesAsync(user)).FirstOrDefault()
+            </td>
+            <td>
+                <form asp-action="Approve" method="post">
+                    <input type="hidden" name="id" value="@user.Id" />
+                    <button class="btn btn-sm btn-success">Approve</button>
+                </form>
+            </td>
+        </tr>
+                }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-info">No accounts awaiting approval.</div>
+}
