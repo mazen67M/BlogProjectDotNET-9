@@ -48,6 +48,11 @@ namespace BlogProjectDotNET_9.Controllers
             }
             var posts = postQuery.ToList();
             ViewBag.Categories = _context.Categories.ToList();
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_PostListPartial", posts);
+            }
             return View(posts);
         }
 

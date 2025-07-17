@@ -1,19 +1,45 @@
-﻿@using BlogProjectDotNET_9.Helper
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+@using BlogProjectDotNET_9.Helper
 @model IEnumerable<Post>;
 @{
     ViewData["Title"] = "Blog Posts";
 }
-
-<div class="text-center mt-3 mb-3">
-    @if (ViewBag.Categories != null)
-    {
-        @foreach (var category in ViewBag.Categories)
-        {
-            <a asp-controller="Post" asp-action="Index" asp-route-categoryID="@category.Id"
-                class="badge bg-warning text-decoration-none ms-2">@category.Name</a>
-        }
+<style>
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease-in-out;
     }
-</div>
+</style>
+
+<form method="get" asp-action="Index" class="row justify-content-center mb-4 gx-2">
+    <div class="col-md-4">
+        <select class="form-select" name="categoryID" onchange="this.form.submit()">
+            <option value="">-- All Categories --</option>
+            @foreach (var category in ViewBag.Categories)
+            {
+                <option value="@category.Id"
+                    selected="@(HttpContextAccessor.HttpContext?.Request?.Query["categoryID"] == category.Id.ToString())">
+                    @category.Name
+                </option>
+            }
+        </select>
+    </div>
+
+    <div class="col-md-4">
+        <input type="search" name="search" class="form-control" placeholder="Search posts..."
+            value="@HttpContextAccessor.HttpContext?.Request?.Query["search"]" />
+    </div>
+
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-search"></i> Filter
+        </button>
+    </div>
+</form>
+
 @if (User.IsInRole("Author"))
 {
     <div class="text-end my-3">
@@ -21,35 +47,39 @@
     </div>
 }
 
-<div class="row row-cols-3 g-4">
-    @foreach (var post in Model)
-    {
-        <div class="col">
-
-            <div class="card h-100 border-0 shadow-lg rounded-1">
-                <img src="@post.FeatureImagePath" alt="@post.Title" class="card-img-top"
-                    style="height:300px; object-fit:cover" />
-                <div class="card-body">
-                    <h1 class="card-title">@post.Title</h1>
-                    <p class="text-muted mb-2 ">Published on @post.PublishedDate.ToString("MMM,dd,yyyy")</p>
-                    <span class="badge bg-secondary">@post.Category?.Name</span>
-                    @{
-                        var content = RemoveHtmlTagHelper.RemoveHtmlTags(post.Content);
-                        var shortContent = content.Length > 100 ? content.Substring(0, 100) + "..." : content;
-                    }
-                    <p class="card-text">@shortContent</p>
-
-                </div>
-
-                <div class="card-footer d-flex justify-content-between align-content-center">
-                    <a class="btn btn-primary btn-sm" asp-action="Details" asp-controller="Post" asp-route-id="@post.Id"> Read More ..</a>
-                    <div class="text-end">
-                        <div class="text-muted">
-                            By @post.Author
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
+<div id="postsContainer">
+    <partial name="_PostListPartial" model="Model" />
 </div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+
+        $(document).ready(function(){
+        const form = $('form[method="get"]');
+
+        form.on('submit', function(e){
+        e.preventDefault();
+
+        const formData = form.serialize();
+        $.ajax({
+        url: '@Url.Action("Index", "Post")',
+        type: 'GET',
+        data: formData,
+        success: function(data) {
+        $('#postsContainer').html(data);
+        },
+        });
+
+        });
+        $('input[name = "search"]').on('input', function() {
+        form.submit();
+        });
+
+        $('select[name="categoryID"]').on('change', function() {
+        form.submit();
+        });
+
+        });
+    </script>
+}

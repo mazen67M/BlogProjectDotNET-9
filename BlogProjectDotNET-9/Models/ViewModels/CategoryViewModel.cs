@@ -1,4 +1,6 @@
-﻿namespace BlogProjectDotNET_9.Models.ViewModels
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace BlogProjectDotNET_9.Models.ViewModels
 {
 
         public class CategoryViewModel

@@ -15,9 +15,13 @@
                     <li class="nav-item">
                         <a class="nav-link text-dark" asp-controller="Admin" asp-action="Dashboard">Dashboard</a>
                     </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link active" asp-action="Index" asp-controller="Category">
+                            Categories
+                        </a>
+                    </li>
                 }
-
-
 
 
                 @if (User.IsInRole("Author"))
@@ -30,14 +34,9 @@
                 <li class="nav-item">
                     <a class="nav-link active" asp-action="Index" asp-controller="Post">
                         Home
-                        <span class="visually-hidden">(current)</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link active" asp-action="Index" asp-controller="Post">
-                        Categories
-                    </a>
-                </li>
+               
                 <li class="nav-item">
                     <a class="nav-link" href="#">About</a>
                 </li>
@@ -52,10 +51,7 @@
                 </li>
                 
             </ul>
-            <form class="d-flex">
-                <input class="form-control me-sm-2" type="search" placeholder="Search">
-                <button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
-            </form>
+          
             @if (User.Identity.IsAuthenticated == false)
             {
 
@@ -68,7 +64,9 @@
             else
             {
                 <div class="d-flex gap-2">
-                    <a asp-controller="Account" asp-action="Logout" class="btn btn-danger text-white">Logout</a>
+                    <a class="btn btn-danger ms-2" href="/Account/Logout">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </a>
                 </div>
             }
 

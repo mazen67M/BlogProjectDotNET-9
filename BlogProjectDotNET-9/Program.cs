@@ -83,7 +83,7 @@ namespace BlogProjectDotNET_9
                 app.MapStaticAssets();
                 app.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Post}/{action=Index}/{id?}")
+                    pattern: "{controller=Home}/{action=Index}/{id?}")
                     .WithStaticAssets();
                 app.Run();
             }
