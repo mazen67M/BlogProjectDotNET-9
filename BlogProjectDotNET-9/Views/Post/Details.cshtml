@@ -1,123 +1,170 @@
-﻿@model Post
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@model Post
+
 @{
     ViewData["Title"] = Model.Title;
 }
+
 <style>
     .content-wrapper {
-        padding: 20px;
-        max-width: 1000px;
+        padding: 30px 20px;
+        max-width: 900px;
         margin: 0 auto;
-        font-family: sans-serif;
+        font-family: 'Segoe UI', sans-serif;
     }
 
     .feature-image {
         width: 100%;
-        height: 500px;
+        height: 450px;
         object-fit: cover;
-        margin-bottom: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+    }
+
+    .comment-card {
+        border-left: 5px solid #0d6efd;
+    }
+
+    .comment-avatar {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+
+    .comment-meta {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    .comment-section-title {
+        border-bottom: 2px solid #dee2e6;
+        padding-bottom: 5px;
+        margin-top: 50px;
     }
 </style>
 
-@if (User.IsInRole("Admin")|| User.IsInRole("Author"))
-{
-    <div class="text-end">
-        <a class="btn btn-secondary" asp-action="Edit" asp-controller="Post" asp-route-id="@Model.Id">Edit Post</a>
-        <a class="btn btnalert-danger" asp-action="Delete" asp-controller="Post" asp-route-id="@Model.Id">Delete
-            Post</a>
-    </div>
-}
-<hr />
-
 <div class="content-wrapper">
-    <h1>@Model.Title</h1>
-    <p><span class="badge bg-primary ">By:</span> @Model.Author </p>
-    <p><span class="badge bg-primary">Published on :</span> @Model.PublishedDate</p>
-    <p><span class="badge bg-secondary">Category:</span> @Model.Category.Name</p>
+    @* Admin / Author Tools *@
+    @if (User.IsInRole("Admin") || User.IsInRole("Author"))
+    {
+        <div class="d-flex justify-content-end mb-2">
+            <a class="btn btn-outline-primary me-2" asp-action="Edit" asp-controller="Post" asp-route-id="@Model.Id">Edit</a>
+            <a class="btn btn-outline-danger" asp-action="Delete" asp-controller="Post" asp-route-id="@Model.Id">Delete</a>
+        </div>
+    }
+
+    <h1 class="fw-bold">@Model.Title</h1>
+
+    <div class="mb-2 text-muted">
+        <span class="badge bg-primary">By: @Model.Author</span>
+        <span class="badge bg-secondary">Published: @Model.PublishedDate.ToString("yyyy-MM-dd")</span>
+        <span class="badge bg-info text-dark">Category: @Model.Category.Name</span>
+    </div>
+
     <img src="@Model.FeatureImagePath" alt="@Model.Title" class="feature-image" />
-    <hr />
-    <div>@Html.Raw(@Model.Content)</div>
+
+    <div class="mb-5">
+        @Html.Raw(Model.Content)
+    </div>
+
+    <h4 class="comment-section-title">Comments</h4>
+
     @if (Model.Comments.Any())
     {
         <div class="CommentSection">
             @foreach (var comment in Model.Comments)
             {
-                <div class="card mb-3 shadow-sm">
+                var user = comment.User;
+                var roleTask = UserManager.GetRolesAsync(user);
+                roleTask.Wait();
+                var role = roleTask.Result.FirstOrDefault() ?? "User";
+
+                var badgeClass = role switch
+                {
+                    "Admin" => "bg-danger",
+                    "Author" => "bg-warning text-dark",
+                    _ => "bg-secondary"
+                };
+
+                <div class="card shadow-sm mb-3 comment-card">
                     <div class="card-body">
-                        <h5 class="card-title">@comment.User.UserName</h5>
-                        <p class="card-text text-muted">@comment.CommentDate</p>
-                        <p class="card-text">@comment.CommentText</p>
+                        <div class="d-flex align-items-center mb-2">
+                            <img src="@(user?.ProfilePictureUrl ?? "/images/default-user.png")" alt="Profile" class="comment-avatar me-3 border border-2" />
+                            <div>
+                                <div class="fw-semibold">@user?.FullName</div>
+                                <span class="badge @badgeClass">@role</span><br />
+                                <small class="comment-meta">@comment.CommentDate.ToString("g")</small>
+                            </div>
+                        </div>
+                        <p class="mb-0">@comment.CommentText</p>
                     </div>
                 </div>
-                <hr />
             }
         </div>
     }
     else
     {
-        <hr />
-        <p class="text-muted">No Comments Yet, Be The First Who Comment</p>
+        <p class="text-muted">No comments yet. Be the first to comment!</p>
     }
 
-    <h3 class="text-black">Leave a Comment</h3>
+    <hr class="mt-5" />
 
-   
+    <h5 class="mb-3">Leave a Comment</h5>
 
-        @if (User?.Identity?.IsAuthenticated==false)
-        {
-            <p> Login to leave a commnet</p>
-            <p><a asp-action="Login" asp-controller="Account"class="btn btn-primary">Login</a></p>
-        }
-        else
-        {
-        <form id="FormComment">
-            <div class="form-group">
-                <label for="UserName"> User Name </label>
-                <input for="UserName" id="UserName" class="form-control" required name="UserName" />
+    @if (!User.Identity.IsAuthenticated)
+    {
+        <p>You must be logged in to leave a comment.</p>
+        <a asp-controller="Account" asp-action="Login" class="btn btn-primary">Login</a>
+    }
+    else
+    {
+        <form id="FormComment" asp-action="AddComment" asp-controller="Comment" method="post">
+            <div class="mb-3">
+                <label for="Content" class="form-label">Your Comment</label>
+                <textarea id="Content" class="form-control" name="Content" rows="4" required></textarea>
             </div>
-            <div class="form-group">
-                <br />
-            <label for="Content"> Comment </label>
-            <textarea for="Content" id="Content" class="form-control" required rows="3" name="Content"></textarea>
-            </div>
-                <button class="btn btn-primary m-3 p-3" value="submit">Comment</button>
-            </form>
-        }
-        </div>
-@section Scripts
-{
+            <button type="submit" class="btn btn-success px-4">Post Comment</button>
+        </form>
+    }
+</div>
+
+@section Scripts {
     <script>
         $(document).ready(function () {
             $("#FormComment").on('submit', function (event) {
                 event.preventDefault();
 
-                var userName = $("#UserName").val();
                 var content = $("#Content").val();
                 var postId = @Model.Id;
 
                 $.ajax({
-                    url: '@Url.Action("AddComment", "Post")',
+                    url: '@Url.Action("AddComment", "Comment")',
                     type: 'POST',
                     contentType: "application/json",
-                    data: JSON.stringify({
-                        UserName: userName,
-                        CommentText: content,
-                        PostId: postId
-                    }),
+                    data: JSON.stringify({ content: content, postId: postId }),
                     success: function (response) {
-                        $('#FormComment')[0].reset(); // ← Reset the form
+                        $('#FormComment')[0].reset();
 
                         $('.CommentSection').append(`
-                                                <div class="card mb-3 shadow-sm">
-                                                    <div class="card-body">
-                                                        <h5 class="card-title">${response.username}</h5>
-                                                        <p class="card-text text-muted">${response.commentDate}</p>
-                                                        <p class="card-text">${response.content}</p>
-                                                    </div>
-                                                </div>
-                                            `);
+                            <div class="card shadow-sm mb-3 comment-card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <img src="${response.profileImage}" class="comment-avatar me-3 border border-2" />
+                                        <div>
+                                            <div class="fw-semibold">${response.userFullName}</div>
+                                            <span class="badge ${response.badgeClass}">${response.role}</span><br />
+                                            <small class="comment-meta">${response.commentDate}</small>
+                                        </div>
+                                    </div>
+                                    <p class="mb-0">${response.commentText}</p>
+                                </div>
+                            </div>
+                        `);
                     },
                     error: function (xhr, status, error) {
-                        console.log("Error:", error);
+                        console.error("Error:", error);
                     }
                 });
             });

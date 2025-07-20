@@ -14,12 +14,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
             public DateTime CommentDate { get; set; } = DateTime.Now;
 
-            // علاقة مع البوست
             public int PostId { get; set; }
             [ValidateNever]
             public Post Post { get; set; }
 
-            // علاقة مع المستخدم
             [ForeignKey("User")]
             public string UserId { get; set; }
             [ValidateNever]

@@ -1,7 +1,9 @@
 ﻿using BlogProjectDotNET_9.Data;
 using BlogProjectDotNET_9.Models;
 using BlogProjectDotNET_9.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Build.Framework;
 using Microsoft.EntityFrameworkCore;
 
 namespace BlogProjectDotNET_9.Controllers
@@ -90,6 +92,42 @@ namespace BlogProjectDotNET_9.Controllers
                 return RedirectToAction("Index");
             }
             return View(model);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Author , Admin")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var CategoryFromDb = await context.Categories
+                .Include(c=>c.Posts).
+                FirstOrDefaultAsync(c=>c.Id ==id);
+
+            if (CategoryFromDb == null)
+                return NotFound();
+
+            var viewModel = new CategoryViewModel { 
+                Id = CategoryFromDb.Id,
+                Name = CategoryFromDb.Name,
+                Description = CategoryFromDb.Description,
+                PostCount = CategoryFromDb.Posts.Count
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Author , Admin")]
+        public async Task<IActionResult> DeleteConfirm(int id)
+        {
+            var categoryFormDb = await context.Categories.FindAsync(id);
+            if (categoryFormDb == null)
+            {
+                return NotFound();
+            }
+
+            context.Categories.Remove(categoryFormDb);
+            await context.SaveChangesAsync();
+            return RedirectToAction("Index");
         }
     }
 }

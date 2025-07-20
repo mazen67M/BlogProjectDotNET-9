@@ -1,4 +1,6 @@
-﻿@{  
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@{  
     var isAuthenticated = User?.Identity?.IsAuthenticated ?? false;  
     var userName = User?.Identity?.Name ?? "Guest";  
 }  
@@ -11,8 +13,8 @@
     <title>@ViewData["Title"] - Blog</title>  
     <link rel="stylesheet" href="~/lib/bootswatch/bootstrap.min.css" />  
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />  
-    @* <link rel="stylesheet" href="~/BlogProjectDotNET_9.styles.css" asp-append-version="true" />   *@
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
 
 </head>  
 

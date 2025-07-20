@@ -1,83 +1,113 @@
-﻿@using Microsoft.AspNetCore.Identity  
-@inject UserManager<ApplicationUser> UserManager  
-@model IEnumerable<ApplicationUser>  
-@{  
+﻿@using BlogProjectDotNET_9.Models.ViewModels  
+@model IEnumerable<UserWithApprovalViewModel>
+
+@{
     ViewData["Title"] = "Admin Dashboard";  
-}  
+}
 
 <h2 class="mt-4">Admin Dashboard</h2>  
 <hr />  
 
 <div class="row text-center mb-5">  
     <div class="col-md-3">  
-        <div class="card bg-primary text-white">  
-            <div class="card-body">  
-                <h4>@ViewBag.UsersCount</h4>  
-                <p>Total Users</p>  
-            </div>  
-        </div>  
-    </div>  
+        <div class="card bg-primary text-white shadow">
+            <div class="card-body">
+                <h4>@ViewBag.UsersCount</h4>
+                <p>Total Users</p>
+            </div>
+        </div>
+    </div>
     <div class="col-md-3">  
-        <div class="card bg-success text-white">  
-            <div class="card-body">  
-                <h4>@ViewBag.AuthorsCount</h4>  
-                <p>Total Authors</p>  
-            </div>  
-        </div>  
-    </div>  
+        <div class="card bg-success text-white shadow">
+            <div class="card-body">
+                <h4>@ViewBag.AuthorsCount</h4>
+                <p>Total Authors</p>
+            </div>
+        </div>
+    </div>
     <div class="col-md-3">  
-        <div class="card bg-warning text-white">  
-            <div class="card-body">  
-                <h4>@ViewBag.PostsCount</h4>  
-                <p>Total Posts</p>  
-            </div>  
-        </div>  
-    </div>  
+        <div class="card bg-warning text-white shadow">
+            <div class="card-body">
+                <h4>@ViewBag.PostsCount</h4>
+                <p>Total Posts</p>
+            </div>
+        </div>
+    </div>
     <div class="col-md-3">  
-        <div class="card bg-danger text-white">  
-            <div class="card-body">  
-                <h4>@ViewBag.CommentsCount</h4>  
-                <p>Total Comments</p>  
-            </div>  
-        </div>  
-    </div>  
-</div>  
+        <div class="card bg-danger text-white shadow">
+            <div class="card-body">
+                <h4>@ViewBag.CommentsCount</h4>
+                <p>Total Comments</p>
+            </div>
+        </div>
+    </div>
+</div>
 
-@if (Model.Any())  
-{  
-    <h3>Pending Approval</h3>  
-    <table class="table table-bordered">  
-        <thead>  
-            <tr>  
-                <th>Full Name</th>  
-                <th>UserName</th>  
-                <th>Email</th>  
-                <th>Role</th>  
-                <th>Approve</th>  
-            </tr>  
-        </thead>  
-        <tbody>  
-            @foreach (var user in Model)  
-            {  
-                <tr>  
-                    <td>@user.FullName</td>  
-                    <td>@user.UserName</td>  
-                    <td>@user.Email</td>  
-                    <td>  
-                        @(await UserManager.GetRolesAsync(user)).FirstOrDefault()  
-                    </td>  
-                    <td>  
-                        <form asp-action="Approve" method="post">  
-                            <input type="hidden" name="id" value="@user.Id" />  
-                            <button class="btn btn-sm btn-success">Approve</button>  
-                        </form>  
-                    </td>  
-                </tr>  
-            }  
-        </tbody>  
-    </table>  
-}  
-else  
-{  
-    <div class="alert alert-info">No accounts awaiting approval.</div>  
+<a asp-action="Users" asp-controller="Admin" class="btn btn-outline-dark mb-4">Manage Users</a>
+<a asp-action="Users" asp-controller="Admin" class="btn btn-outline-dark mb-4">Manage Posts</a>
+<a asp-action="Index" asp-controller="Category" class="btn btn-outline-dark mb-4">Manage Categories</a>
+
+
+
+@if (Model.Any())
+{
+    <h3>Pending Approval</h3>
+    <table class="table table-bordered table-striped table-hover align-middle">
+        <thead class="table-dark text-center">
+            <tr>
+                <th>Full Name</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Approve</th>
+                <th>Change Role</th>
+            </tr>
+        </thead>
+        <tbody>
+           @foreach (var user in Model)
+           {
+               <tr>
+                   <td>@user.FullName</td>
+                   <td>@user.UserName</td>
+                   <td>@user.Email</td>
+                   <td class="text-center">
+                       <span class="badge bg-info">@user.Role</span>
+                   </td>
+
+                   <td class="text-center">
+                       <form asp-action="Approve" method="post">
+                           <input type="hidden" name="id" value="@user.Id" />
+                           <button class="btn btn-sm btn-success">Approve</button>
+                       </form>
+                   </td>
+
+                   <td>
+                       <form asp-controller="Admin" asp-action="ChangeRole" method="post" class="d-flex align-items-center gap-2">
+                           <input type="hidden" name="id" value="@user.Id" />
+                           <select name="newRole" class="form-select form-select-sm w-auto">
+                                @foreach (var role in new[] { "User", "Author", "Admin" })
+                                {
+                                    if (role == user.Role)
+                                    {
+                                        @:
+                                        <option value="@role" selected>@role</option>
+                                    }
+                                    else
+                                    {
+                                        @:
+                                        <option value="@role">@role</option>
+                                    }
+                                }
+                           </select>
+                           <button type="submit" class="btn btn-sm btn-warning">Change</button>
+                       </form>
+                   </td>
+               </tr>
+           }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-info">No accounts awaiting approval.</div>
 }

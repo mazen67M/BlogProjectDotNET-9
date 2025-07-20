@@ -17,11 +17,11 @@ namespace BlogProjectDotNET_9.Controllers
 
         readonly AppDbContext _context;
         readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly string[] _allowedExtensions = { ".jpg", ".jpeg", ".png" };
 
-        public UserManager<ApplicationUser> _userManager { get; }
 
-        public PostController(AppDbContext context, IWebHostEnvironment webHostEnvironment, UserManager<ApplicationUser> userManager )
+        public PostController(AppDbContext context, IWebHostEnvironment webHostEnvironment, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _webHostEnvironment = webHostEnvironment;
@@ -60,8 +60,11 @@ namespace BlogProjectDotNET_9.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Details(int id)
         {
-            var post = await _context.Posts.Include(p => p.Category).Include(p => p.Comments)
-                            .FirstOrDefaultAsync(p => p.Id == id);
+            var post = await _context.Posts
+                .Include(p => p.Category)
+                .Include(p => p.Comments)
+                .ThenInclude(c=> c.User)
+                .FirstOrDefaultAsync(p => p.Id == id);
             if (post == null)
             {
                 return NotFound();
@@ -109,7 +112,6 @@ namespace BlogProjectDotNET_9.Controllers
                     PostViewModel.Post.AuthorId = userId;
                 }
 
-            // التحقق من رفع صورة
             if (PostViewModel.FeatureImage != null)
             {
                 var inputFileExtension = Path.GetExtension(PostViewModel.FeatureImage.FileName).ToLower();
@@ -194,7 +196,6 @@ namespace BlogProjectDotNET_9.Controllers
                 return NotFound();
             }
 
-            // حذف الصورة من المجلد
             if (!string.IsNullOrEmpty(postFromDb.FeatureImagePath))
             {
                 var existingFilePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", Path.GetFileName(postFromDb.FeatureImagePath));
@@ -268,7 +269,6 @@ namespace BlogProjectDotNET_9.Controllers
                     return View(editViewModel);
                 }
 
-                // حذف الصورة القديمة إذا كانت موجودة
                 if (!string.IsNullOrEmpty(postFromDb.FeatureImagePath))
                 {
                     var existingFilePath = Path.Combine(_webHostEnvironment.WebRootPath, "images",

@@ -1,41 +1,65 @@
-﻿@model IEnumerable<ApplicationUser>
+﻿@model IEnumerable<UserWithApprovalViewModel>
+
 @{
     ViewData["Title"] = "Manage Users";
 }
 
-<h2>Manage Users</h2>
+<h2 class="mb-4">Manage Users</h2>
 
-<table class="table table-bordered">
-    <thead>
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<table class="table table-hover align-middle">
+    <thead class="table-dark text-center">
         <tr>
+            <th>Profile</th>
             <th>Full Name</th>
             <th>UserName</th>
             <th>Email</th>
-            <th>Role</th>
+            <th>Current Role</th>
+            <th>Change Role</th>
             <th>Is Approved</th>
             <th>Actions</th>
         </tr>
     </thead>
-    <tbody>
+    <tbody class="text-center">
         @foreach (var user in Model)
         {
             <tr>
+                <!-- ✅ صورة المستخدم -->
+                <td>
+                    <img src="@user.ProfilePictureUrl ?? "/images/default-user.png"" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;" />
+                </td>
+
                 <td>@user.FullName</td>
                 <td>@user.UserName</td>
                 <td>@user.Email</td>
+
+                <!-- عرض الدور الحالي -->
                 <td>
-                    <form asp-action="ChangeRole" method="post">
+                    <span class="badge bg-secondary">@user.Role</span>
+                </td>
+
+                <!-- تغيير الدور -->
+                <td>
+                    <form asp-action="ChangeRole" method="post" class="d-flex justify-content-center align-items-center gap-2">
                         <input type="hidden" name="id" value="@user.Id" />
-                        <select name="newRole" class="form-select form-select-sm">
-                            <option value="User">User</option>
-                            <option value="Author">Author</option>
-                            <option value="Admin">Admin</option>
+                        <select name="newRole" class="form-select form-select-sm w-auto">
+                            @foreach (var role in new[] { "User", "Author", "Admin" })
+                            {
+                                var selected = role == user.Role ? "selected" : "";
+                                @:<option value="@role" @selected>@role</option>
+                            }
                         </select>
-                        <button class="btn btn-sm btn-warning mt-1" type="submit">Change</button>
+                        <button class="btn btn-sm btn-warning" type="submit">Change</button>
                     </form>
                 </td>
+
+                <!-- الموافقة -->
                 <td>
-                    @if (!user.IsApproved)
+                    @if (!user.isApproved)
                     {
                         <form asp-action="Approve" method="post">
                             <input type="hidden" name="id" value="@user.Id" />
@@ -47,6 +71,8 @@
                         <span class="badge bg-success">Approved</span>
                     }
                 </td>
+
+                <!-- الحذف -->
                 <td>
                     <form asp-action="Delete" method="post" onsubmit="return confirm('Are you sure?');">
                         <input type="hidden" name="id" value="@user.Id" />

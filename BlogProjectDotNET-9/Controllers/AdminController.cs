@@ -1,5 +1,6 @@
 ﻿using BlogProjectDotNET_9.Data;
 using BlogProjectDotNET_9.Models;
+using BlogProjectDotNET_9.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -22,32 +23,49 @@ namespace BlogProjectDotNET_9.Controllers
             _roleManager = roleManager;
             _context = context;
         }
+
         public IActionResult Users()
         {
             var users = _userManager.Users.ToList();
-            return View(users);
+            var viewModel = new List<UserWithApprovalViewModel>();
+
+            foreach (var user in users)
+            {
+                var roles = _userManager.GetRolesAsync(user).Result;
+                viewModel.Add(new UserWithApprovalViewModel
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    FullName = user.FullName,
+                    isApproved = user.IsApproved,
+                    Role = roles.FirstOrDefault() ?? "No Role"
+                });
+            }
+            return View(viewModel);
         }
 
         [HttpPost]
         public async Task<IActionResult> Approve(string id)
-        { 
+        {
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
             {
                 return NotFound();
             }
+
             user.IsApproved = true;
             var result = await _userManager.UpdateAsync(user);
+
             if (result.Succeeded)
             {
                 return RedirectToAction("Users");
             }
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError("", error.Description);
-            }
-            return View("Users", _userManager.Users.ToList());
+
+            TempData["Error"] = "Failed to approve user: " + string.Join(", ", result.Errors.Select(e => e.Description));
+            return RedirectToAction("Users");
         }
+
 
         [HttpPost]
         public async Task<IActionResult> ChangeRole(string id, string newRole)
@@ -71,7 +89,16 @@ namespace BlogProjectDotNET_9.Controllers
             var user = await _userManager.FindByIdAsync(id);
             if (user == null) return NotFound();
 
-            await _userManager.DeleteAsync(user);
+            var posts = _context.Posts.Where(p => p.AuthorId == user.Id).ToList();
+            _context.Posts.RemoveRange(posts);
+            await _context.SaveChangesAsync();
+
+            var result = await _userManager.DeleteAsync(user);
+            if (!result.Succeeded)
+            {
+                TempData["Error"] = "Failed to delete user: " + string.Join(", ", result.Errors.Select(e => e.Description));
+                return RedirectToAction("Users");
+            }
             return RedirectToAction("Users");
         }
 
@@ -81,7 +108,6 @@ namespace BlogProjectDotNET_9.Controllers
             var authorsCount = await _userManager.GetUsersInRoleAsync("Author");
             var postsCount = await _context.Posts.CountAsync();
             var commentsCount = await _context.Comments.CountAsync();
-            var DefaultusersCount = await _userManager.GetUsersInRoleAsync("User");
 
             var unapprovedUsers = _userManager.Users
                                     .Where(u => !u.IsApproved)
@@ -92,7 +118,24 @@ namespace BlogProjectDotNET_9.Controllers
             ViewBag.PostsCount = postsCount;
             ViewBag.CommentsCount = commentsCount;
 
-            return View(unapprovedUsers); // 🔁 بدلًا من return View() فقط
+            var model = new List<UserWithApprovalViewModel>();
+            foreach (var user in unapprovedUsers)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                var role = roles.FirstOrDefault();
+                model.Add(new UserWithApprovalViewModel
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    FullName = user.FullName,
+                    isApproved = user.IsApproved,
+                    Role = roles.FirstOrDefault() ?? "No Role"
+                });
+            }
+
+
+            return View(model);
         }
 
         public IActionResult Index()
