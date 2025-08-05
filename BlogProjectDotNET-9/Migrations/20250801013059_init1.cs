@@ -3,82 +3,14 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace BlogProjectDotNET_9.Migrations
 {
     /// <inheritdoc />
-    public partial class InitAddingIdentityWithUser : Migration
+    public partial class init1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DeleteData(
-                table: "Posts",
-                keyColumn: "Id",
-                keyValue: 1);
-
-            migrationBuilder.DeleteData(
-                table: "Posts",
-                keyColumn: "Id",
-                keyValue: 2);
-
-            migrationBuilder.DeleteData(
-                table: "Posts",
-                keyColumn: "Id",
-                keyValue: 3);
-
-            migrationBuilder.DeleteData(
-                table: "Categories",
-                keyColumn: "Id",
-                keyValue: 1);
-
-            migrationBuilder.DeleteData(
-                table: "Categories",
-                keyColumn: "Id",
-                keyValue: 2);
-
-            migrationBuilder.DeleteData(
-                table: "Categories",
-                keyColumn: "Id",
-                keyValue: 3);
-
-            migrationBuilder.DropColumn(
-                name: "Author",
-                table: "Posts");
-
-            migrationBuilder.DropColumn(
-                name: "UserName",
-                table: "Comments");
-
-            migrationBuilder.AlterColumn<string>(
-                name: "FeatureImagePath",
-                table: "Posts",
-                type: "nvarchar(max)",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
-
-            migrationBuilder.AddColumn<string>(
-                name: "ApplicationUserId",
-                table: "Posts",
-                type: "nvarchar(450)",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "AuthorId",
-                table: "Posts",
-                type: "nvarchar(450)",
-                nullable: false,
-                defaultValue: "");
-
-            migrationBuilder.AddColumn<string>(
-                name: "UserId",
-                table: "Comments",
-                type: "nvarchar(450)",
-                nullable: false,
-                defaultValue: "");
-
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
@@ -120,6 +52,20 @@ namespace BlogProjectDotNET_9.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Categories",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Categories", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -228,20 +174,63 @@ namespace BlogProjectDotNET_9.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Posts_ApplicationUserId",
-                table: "Posts",
-                column: "ApplicationUserId");
+            migrationBuilder.CreateTable(
+                name: "Posts",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PublishedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    FeatureImagePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AuthorId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CategoryId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Posts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Posts_AspNetUsers_AuthorId",
+                        column: x => x.AuthorId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Posts_Categories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "Categories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Posts_AuthorId",
-                table: "Posts",
-                column: "AuthorId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Comments_UserId",
-                table: "Comments",
-                column: "UserId");
+            migrationBuilder.CreateTable(
+                name: "Comments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CommentText = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CommentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    PostId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Comments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Comments_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Comments_Posts_PostId",
+                        column: x => x.PostId,
+                        principalTable: "Posts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -282,45 +271,30 @@ namespace BlogProjectDotNET_9.Migrations
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_Comments_AspNetUsers_UserId",
+            migrationBuilder.CreateIndex(
+                name: "IX_Comments_PostId",
                 table: "Comments",
-                column: "UserId",
-                principalTable: "AspNetUsers",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                column: "PostId");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_Posts_AspNetUsers_ApplicationUserId",
-                table: "Posts",
-                column: "ApplicationUserId",
-                principalTable: "AspNetUsers",
-                principalColumn: "Id");
+            migrationBuilder.CreateIndex(
+                name: "IX_Comments_UserId",
+                table: "Comments",
+                column: "UserId");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_Posts_AspNetUsers_AuthorId",
+            migrationBuilder.CreateIndex(
+                name: "IX_Posts_AuthorId",
                 table: "Posts",
-                column: "AuthorId",
-                principalTable: "AspNetUsers",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                column: "AuthorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Posts_CategoryId",
+                table: "Posts",
+                column: "CategoryId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Comments_AspNetUsers_UserId",
-                table: "Comments");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Posts_AspNetUsers_ApplicationUserId",
-                table: "Posts");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Posts_AspNetUsers_AuthorId",
-                table: "Posts");
-
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -337,79 +311,19 @@ namespace BlogProjectDotNET_9.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Comments");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "Posts");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
 
-            migrationBuilder.DropIndex(
-                name: "IX_Posts_ApplicationUserId",
-                table: "Posts");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Posts_AuthorId",
-                table: "Posts");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Comments_UserId",
-                table: "Comments");
-
-            migrationBuilder.DropColumn(
-                name: "ApplicationUserId",
-                table: "Posts");
-
-            migrationBuilder.DropColumn(
-                name: "AuthorId",
-                table: "Posts");
-
-            migrationBuilder.DropColumn(
-                name: "UserId",
-                table: "Comments");
-
-            migrationBuilder.AlterColumn<string>(
-                name: "FeatureImagePath",
-                table: "Posts",
-                type: "nvarchar(max)",
-                nullable: false,
-                defaultValue: "",
-                oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
-                oldNullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "Author",
-                table: "Posts",
-                type: "nvarchar(max)",
-                nullable: false,
-                defaultValue: "");
-
-            migrationBuilder.AddColumn<string>(
-                name: "UserName",
-                table: "Comments",
-                type: "nvarchar(100)",
-                maxLength: 100,
-                nullable: false,
-                defaultValue: "");
-
-            migrationBuilder.InsertData(
-                table: "Categories",
-                columns: new[] { "Id", "Description", "Name" },
-                values: new object[,]
-                {
-                    { 1, "Description 1", "Technology" },
-                    { 2, "Description 2", "Health" },
-                    { 3, "Description 3", "Life Style" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "Posts",
-                columns: new[] { "Id", "Author", "CategoryId", "Content", "FeatureImagePath", "PublishedDate", "Title" },
-                values: new object[,]
-                {
-                    { 1, "John Doe", 1, "Content of Tech Post 1", "tech_image.jpg", new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Tech Post 1" },
-                    { 2, "Jane Doe", 2, "Content of Health Post 1", "health_image.jpg", new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Health Post 1" },
-                    { 3, "Alex Smith", 3, "Content of Lifestyle Post 1", "lifestyle_image.jpg", new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Lifestyle Post 1" }
-                });
+            migrationBuilder.DropTable(
+                name: "Categories");
         }
     }
 }

@@ -17,7 +17,7 @@ namespace BlogProjectDotNET_9.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.6")
+                .HasAnnotation("ProductVersion", "9.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -161,9 +161,6 @@ namespace BlogProjectDotNET_9.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("AuthorId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -187,8 +184,6 @@ namespace BlogProjectDotNET_9.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("AuthorId");
 
@@ -335,7 +330,7 @@ namespace BlogProjectDotNET_9.Migrations
                     b.HasOne("BlogProjectDotNET_9.Models.Post", "Post")
                         .WithMany("Comments")
                         .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("BlogProjectDotNET_9.Models.ApplicationUser", "User")
@@ -351,14 +346,10 @@ namespace BlogProjectDotNET_9.Migrations
 
             modelBuilder.Entity("BlogProjectDotNET_9.Models.Post", b =>
                 {
-                    b.HasOne("BlogProjectDotNET_9.Models.ApplicationUser", null)
-                        .WithMany("Posts")
-                        .HasForeignKey("ApplicationUserId");
-
                     b.HasOne("BlogProjectDotNET_9.Models.ApplicationUser", "Author")
-                        .WithMany()
+                        .WithMany("Posts")
                         .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("BlogProjectDotNET_9.Models.Category", "Category")
